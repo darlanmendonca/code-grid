@@ -1,69 +1,36 @@
-import React from 'react'
-import Header from './components/Header'
-import CharacterInput from './components/CharacterInput'
-import Button from './components/Button'
+import React, { Suspense } from 'react'
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom'
 import Loading from './components/Loading'
-import Grid from './components/Grid'
-import Code from './components/Code'
-import useURL from './hooks/useURL'
-import useFetch from './hooks/useFetch'
+import { GridProvider } from './components/Grid'
+
+const Home = React.lazy(() => import('./pages/Home'))
+const Payments = React.lazy(() => import('./pages/Payments'))
 
 const App: React.FC = () => {
-  const [allowCharacter, setAllowCharacter] = React.useState(true)
-  const [generating, setGenerating] = React.useState(false)
-  const [bias, setBias] = React.useState('')
-
-  const gridURL = useURL('api/grid', {
-    bias,
-  })
-
-  const { data, loading, refetch } = useFetch<{
-    characters: string[][]
-    code: string
-  }>(gridURL.toString(), generating)
-
-  React.useEffect(() => {
-    if (!generating) return
-
-    const refetchInterval = setInterval(() => {
-      refetch()
-    }, 2000)
-
-    return () => clearInterval(refetchInterval)
-  }, [refetch, generating])
-
-  React.useEffect(() => {
-    if (!bias || !generating) return
-
-    setAllowCharacter(false)
-
-    const allowCharacterInterval = setInterval(() => {
-      setAllowCharacter(true)
-    }, 4000)
-
-    return () => clearInterval(allowCharacterInterval)
-  }, [bias, generating])
-
-  const characters = data?.characters ?? []
-  const code = data?.code ?? ''
-
   return (
-    <>
-      <Header>
-        <CharacterInput value={bias} onChange={setBias} disabled={!allowCharacter} />
+    <Router>
+      <div>
+        <nav>
+          <ul>
+            <li>
+              <Link to="/">Grid</Link>
+            </li>
+            <li>
+              <Link to="/payments">Payments</Link>
+            </li>
+          </ul>
+        </nav>
 
-        {!generating && <Button label="Generate 2D Grid" onClick={() => setGenerating(true)} primary />}
-      </Header>
-
-      {loading && !data && <Loading />}
-
-      {data && (
-        <>
-          <Grid characters={characters} highlight={bias} />
-          <Code value={code} />
-        </>
-      )}
-    </>
+        <Suspense fallback={<Loading />}>
+          <GridProvider>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/payments" element={<Payments />} />
+            </Routes>
+          </GridProvider>
+        </Suspense>
+      </div>
+    </Router>
   )
 }
 
