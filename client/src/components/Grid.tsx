@@ -1,65 +1,75 @@
-import React from 'react'
-import styled from '@emotion/styled'
+import React, { createContext, useState, useEffect } from 'react'
+import useURL from '../hooks/useURL'
+import useFetch from '../hooks/useFetch'
 
-interface Props {
+interface GridContextState {
+  allowCharacter: boolean
+  setAllowCharacter: (allow: boolean) => void
+  generating: boolean
+  setGenerating: (generating: boolean) => void
+  bias: string
+  setBias: (bias: string) => void
   characters: string[][]
-  highlight?: string
+  code: string
+  refetch: () => void
+  loading: boolean
+  data?: GridData
 }
 
-const Table = styled.table`
-  width: 100%;
-  max-width: 500px;
-  margin: 2em auto;
-  table-layout: fixed;
-  border-spacing: 0;
-  border: 0;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-`
+interface GridData {
+  characters: string[][]
+  code: string
+}
 
-const TableRow = styled.tr`
-  & + tr td {
-    border-top: 1px solid #e9ecef;
+export const GridContext = createContext<GridContextState | undefined>(undefined)
+
+export const GridProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [allowCharacter, setAllowCharacter] = useState(true)
+  const [generating, setGenerating] = useState(false)
+  const [bias, setBias] = useState('')
+
+  const gridURL = useURL('api/grid', { bias })
+  const { data, loading, refetch } = useFetch<GridData>(gridURL.toString(), generating)
+
+  useEffect(() => {
+    if (!generating) return
+
+    const refetchInterval = setInterval(() => {
+      refetch()
+    }, 2000)
+
+    return () => clearInterval(refetchInterval)
+  }, [refetch, generating])
+
+  useEffect(() => {
+    if (!bias || !generating) return
+
+    setAllowCharacter(false)
+
+    const allowCharacterInterval = setInterval(() => {
+      setAllowCharacter(true)
+    }, 4000)
+
+    return () => clearInterval(allowCharacterInterval)
+  }, [bias, generating])
+
+  const characters = data?.characters ?? []
+  const code = data?.code ?? ''
+
+  // Context value
+  const value = {
+    allowCharacter,
+    setAllowCharacter,
+    generating,
+    setGenerating,
+    bias,
+    setBias,
+    characters,
+    code,
+    refetch,
+    loading,
+    data,
   }
-`
 
-const TableCell = styled.td<{ highlight?: boolean }>`
-  text-align: center;
-  text-transform: uppercase;
-  font-family: sans-serif;
-  transition: all 0.2s ease;
-  color: ${({ highlight }) => (highlight ? '#495057' : '#868e96')};
-  background-color: ${({ highlight }) => (highlight ? '#dee2e6' : 'transparent')};
-
-  & + td {
-    border-left: 1px solid #e9ecef;
-  }
-
-  &:after,
-  &:before {
-    content: '';
-
-    display: block;
-    padding-bottom: calc(50% - 0.5em);
-  }
-`
-
-const Grid: React.FC<Props> = (props) => (
-  <>
-    <Table>
-      <tbody>
-        {props.characters.map((line, lineIndex) => (
-          <TableRow key={lineIndex}>
-            {line.map((char, index) => (
-              <TableCell key={index} highlight={char === props.highlight}>
-                {char}
-              </TableCell>
-            ))}
-          </TableRow>
-        ))}
-      </tbody>
-    </Table>
-  </>
-)
-
-export default Grid
+  return <GridContext.Provider value={value}>{children}</GridContext.Provider>
+}
