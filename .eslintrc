@@ -1,0 +1,12 @@
+{
+  "parser": "@typescript-eslint/parser",
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended", "plugin:react-hooks/recommended"],
+  "parserOptions": { "ecmaVersion": 2018, "sourceType": "module" },
+  "ignorePatterns": ["client/dist"],
+  "plugins": ["react-refresh"],
+  "rules": {
+    "semi": ["error", "never"],
+    "quotes": ["error", "single"],
+    "react-refresh/only-export-components": ["warn", { "allowConstantExport": true }]
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "name": "kanban",
+  "version": "1.0.0",
+  "description": "An exercise using Node and React",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"vite --port 3001\" \"NODE_ENV=development nodemon api/index.ts\"",
+    "lint": "eslint **/*.ts"
+  },
+  "author": "Darlan Mendonça",
+  "engines": {
+    "node": ">=0.12"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.4",
+    "@emotion/styled": "^11.11.5",
+    "body-parser": "^1.20.2",
+    "express": "^4.18.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@emotion/babel-plugin": "^11.11.0",
+    "@types/body-parser": "^1.19.5",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.2.66",
+    "@types/react-dom": "^18.2.22",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "@vitejs/plugin-react": "^4.2.1",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.6",
+    "nodemon": "^3.0.2",
+    "prettier": "^3.1.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3",
+    "vite": "^5.2.0"
+  }
+}
